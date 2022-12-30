@@ -20,7 +20,7 @@ def searchFiles():
     for musicDir in dirList:
         for root, dirs, files in os.walk(musicDir):
             for file in files:
-                if file.endswith(".mp3") or file.endswith(".m4a"):
+                if file.endswith(".mp3"):  # or file.endswith(".m4a"):
                     print(os.path.join(root, file))
                     fileList.append(os.path.join(root, file))
 

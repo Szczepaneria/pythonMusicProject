@@ -170,10 +170,12 @@ class Player:
 
     def playPause(self) -> None:
         player.pause()
+        # change button UI to play
         return
 
     def playUnPause(self) -> None:
         player.unpause()
+        # change button UI to pause
         return
 
     def changeVolume(self, amount) -> bool:
@@ -205,4 +207,17 @@ class Player:
 
     def updateCurrentPlaybackPos(self):
         self.currentPlaybackPos = player.get_pos()
+        return
+    def changeMode(self):
+        if self.mode == "auto":
+            self.mode = "one loop"
+            # change button icon
+
+        elif self.mode == "one loop":
+            self.mode = "loop"
+            # change button icon
+
+        elif self.mode == "loop":
+            self.mode = "auto"
+            # change button icon
         return

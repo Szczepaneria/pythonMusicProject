@@ -1,3 +1,6 @@
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
 import pygame
 from pygame import mixer as playerMusic
 import os
@@ -78,10 +81,10 @@ class Player:
         playerMusic.music.set_endevent(pygame.USEREVENT)
         # write a goddamn userevent for this lil bullshit
 
-    def checkUserEvent(self):
+    def checkUserEvent(self, display):
         for event in pygame.event.get():
             if event.type == self.MUSIC_END:
-                self.endEvent()
+                self.endEvent(display)
                 return
         print("checked")
         return
@@ -94,7 +97,7 @@ class Player:
             f.close()
         return
 
-    def endEvent(self):
+    def endEvent(self, display):
         if self.mode == "auto":
             if self.currentIndex == self.maxIndex:
                 self.currentIndex = 0
@@ -104,6 +107,7 @@ class Player:
             self.updateBaseData()
             playerMusic.music.load(self.playlist[self.currentIndex])
             playerMusic.music.play()
+            display.setPlaceholderText(self.currentFileName)
             print("Playing")
             return
 
@@ -123,6 +127,7 @@ class Player:
             self.currentPlaybackPos = 0.0
             playerMusic.music.load(self.currentFile)
             playerMusic.music.play()
+            display.setPlaceholderText(self.currentFileName)
             print("Playing in loop")
             return
 
@@ -132,7 +137,7 @@ class Player:
             print("Player is stopped, waiting")
             return
 
-    def playNext(self) -> None:
+    def playNext(self, display) -> None:
         # for later check if music was playing
         wasBusy = False
 
@@ -155,8 +160,9 @@ class Player:
                 playerMusic.music.play(-1)
             elif self.mode != "one loop":
                 playerMusic.music.play()
+        display.setPlaceholderText(self.currentFileName)
 
-    def playPrevious(self) -> None:
+    def playPrevious(self, display) -> None:
         # for later check if music was playing
         wasBusy = False
 
@@ -164,6 +170,7 @@ class Player:
             # if more than 10s just jump to previous
             playerMusic.music.rewind()
             self.currentPlaybackPos = 0.0
+            display.setPlaceholderText(self.currentFileName)
             return
 
         elif playerMusic.music.get_busy():
@@ -184,6 +191,7 @@ class Player:
         if wasBusy:
             playerMusic.music.play()
         self.currentPlaybackPos = 0
+        display.setPlaceholderText(self.currentFileName)
         return
 
     def playPause(self) -> None:
@@ -195,6 +203,14 @@ class Player:
         playerMusic.music.unpause()
         # change button UI to pause
         return
+
+    def playPushedPlay(self, button):
+        if playerMusic.music.get_busy():
+            self.playPause()
+            button.setIcon(QIcon("play.png"))
+        else:
+            self.playUnPause()
+            button.setIcon(QIcon("pause.png"))
 
     def changeVolume(self, amount) -> bool:
         checkedAmount = 0.0
@@ -226,6 +242,7 @@ class Player:
     def updateCurrentPlaybackPos(self):
         self.currentPlaybackPos = playerMusic.music.get_pos()
         return
+
     def changeMode(self):
         if self.mode == "auto":
             self.mode = "one loop"

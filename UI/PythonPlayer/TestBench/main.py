@@ -12,6 +12,10 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt, QTimer
 import pyPlayer as playerTools
 
+# init player with playlist
+playerTools.searchFiles()
+p1 = playerTools.Player(playerTools.InitPlaylist(playerTools.fileList, mode=1))
+
 
 class Ui_Widget(object):
     def setupUi(self, Widget):
@@ -101,6 +105,10 @@ class Ui_Widget(object):
         self.retranslateUi(Widget)
         QtCore.QMetaObject.connectSlotsByName(Widget)
 
+        self.buttonPlay.clicked.connect(p1.playPushedPlay(self.buttonPlay))
+        self.buttonNext.clicked.connect(p1.playNext(self.textSongDisplay))
+        self.buttonPrevious.clicked.connect(p1.playPrevious(self.textSongDisplay))
+
     def retranslateUi(self, Widget):
         _translate = QtCore.QCoreApplication.translate
         Widget.setWindowTitle(_translate("Widget", "Widget"))
@@ -109,13 +117,11 @@ class Ui_Widget(object):
         self.buttonPrevious.setText(_translate("Widget", "Previous"))
         self.buttonPlay.setText(_translate("Widget", "Play/Pause"))
 
+    def getDisplay(self):
+        return self.textSongDisplay
+
 
 if __name__ == "__main__":
-    playerTools.searchFiles()
-
-    # init player with playlist
-    p1 = playerTools.Player(playerTools.InitPlaylist(playerTools.fileList, mode=1))
-
     app = QtWidgets.QApplication(sys.argv)
     Widget = QtWidgets.QWidget()
     ui = Ui_Widget()
@@ -123,7 +129,7 @@ if __name__ == "__main__":
     Widget.show()
 
     timer = QTimer()
-    timer.timeout.connect(lambda: p1.checkUserEvent())
+    timer.timeout.connect(lambda: p1.checkUserEvent(Ui_Widget.getDisplay(ui)))
     timer.setInterval(500)  # 1000ms = 1s
     timer.start()
     sys.exit(app.exec_())

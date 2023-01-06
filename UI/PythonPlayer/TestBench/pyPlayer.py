@@ -1,5 +1,5 @@
 import pygame
-import pygame.mixer.music as player
+from pygame import mixer as playerMusic
 import os
 import audioread as info
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -24,7 +24,8 @@ def searchFiles():
                 if file.endswith(".mp3"):  # or file.endswith(".m4a"):
                     print(os.path.join(root, file))
                     fileList.append(os.path.join(root, file))
-
+    if fileList.__len__() == 0:
+        exit("No directories found!")
     # check list of directories
 
 
@@ -56,6 +57,7 @@ class Player:
         self.currentFile = playlist[self.currentIndex]
         self.currentFileName = os.path.basename(self.currentFile)
         self.currentPlaybackPos = 0.0
+        pygame.mixer.init()
 
         with info.audio_open(self.currentFile) as f:
             self.fileDuration = f.duration
@@ -70,7 +72,7 @@ class Player:
         # auto --> play till the playlist ends
         # stop after 1 --> one stop
 
-        player.set_endevent(pygame.USEREVENT)
+        playerMusic.music.set_endevent(pygame.USEREVENT)
         # write a goddamn userevent for this lil bullshit
 
     def updateBaseData(self) -> None:
@@ -81,7 +83,7 @@ class Player:
             f.close()
         return
 
-    def endEvent(self) -> str:
+    def endEvent(self) -> None:
         if self.mode == "auto":
             if self.currentIndex == self.maxIndex:
                 self.currentIndex = 0
@@ -89,40 +91,44 @@ class Player:
                 self.currentIndex += 1
 
             self.updateBaseData()
-            player.load(self.playlist[self.currentIndex])
-            player.play()
-            return "Playing"
+            playerMusic.music.load(self.playlist[self.currentIndex])
+            playerMusic.music.play()
+            print("Playing")
+            return
 
         elif self.mode == "one stop":
-            player.pause()
-            player.unload()
-            player.load(self.currentFile)
+            playerMusic.music.pause()
+            playerMusic.music.unload()
+            playerMusic.music.load(self.currentFile)
             self.currentPlaybackPos = self.fileDuration
             # do nothing
             print("Player waiting for action")
-            return "Paused"
+            print("Paused")
+            return
 
         elif self.mode == "loop":
-            player.pause()
-            player.unload()
+            playerMusic.music.pause()
+            playerMusic.music.unload()
             self.currentPlaybackPos = 0.0
-            player.load(self.currentFile)
-            player.play()
-            return "Playing in loop"
+            playerMusic.music.load(self.currentFile)
+            playerMusic.music.play()
+            print("Playing in loop")
+            return
 
         else:
-            player.unload()
-            player.pause()
+            playerMusic.music.unload()
+            playerMusic.music.pause()
             print("Player is stopped, waiting")
+            return
 
     def playNext(self) -> None:
         # for later check if music was playing
         wasBusy = False
 
-        if player.get_busy():
+        if playerMusic.music.get_busy():
             wasBusy = True
-            player.pause()
-        player.unload()
+            playerMusic.music.pause()
+        playerMusic.music.unload()
 
         if self.currentIndex == self.maxIndex:
             self.currentIndex = 0
@@ -131,28 +137,28 @@ class Player:
 
         self.updateBaseData()
         # player.load(self.playlist[self.currentIndex])
-        player.load(self.currentFile)
+        playerMusic.music.load(self.currentFile)
 
         if wasBusy:
             if self.mode == "one loop":
-                player.play(-1)
+                playerMusic.music.play(-1)
             elif self.mode != "one loop":
-                player.play()
+                playerMusic.music.play()
 
     def playPrevious(self) -> None:
         # for later check if music was playing
         wasBusy = False
 
-        if player.get_pos() >= 10000:
+        if playerMusic.music.get_pos() >= 10000:
             # if more than 10s just jump to previous
-            player.rewind()
+            playerMusic.music.rewind()
             self.currentPlaybackPos = 0.0
             return
 
-        elif player.get_busy():
+        elif playerMusic.music.get_busy():
             wasBusy = True
-            player.pause()
-        player.unload()
+            playerMusic.music.pause()
+        playerMusic.music.unload()
 
         if self.currentIndex == 0:
             self.currentIndex = self.maxIndex
@@ -162,20 +168,20 @@ class Player:
         self.updateBaseData()
 
         # player.load(self.playlist[self.currentIndex])
-        player.load(self.currentFile)
+        playerMusic.music.load(self.currentFile)
 
         if wasBusy:
-            player.play()
+            playerMusic.music.play()
         self.currentPlaybackPos = 0
         return
 
     def playPause(self) -> None:
-        player.pause()
+        playerMusic.music.pause()
         # change button UI to play
         return
 
     def playUnPause(self) -> None:
-        player.unpause()
+        playerMusic.music.unpause()
         # change button UI to pause
         return
 
@@ -187,7 +193,7 @@ class Player:
         elif amount < 0.0:
             checkedAmount = 0.0
         try:
-            player.set_volume(checkedAmount)
+            playerMusic.music.set_volume(checkedAmount)
         except:
             return False
         else:
@@ -195,19 +201,19 @@ class Player:
 
     def changePos(self, pos):
         playerWasBusy = False
-        if player.get_busy():
+        if playerMusic.music.get_busy():
             playerWasBusy = True
-            player.pause()
+            playerMusic.music.pause()
 
-        player.rewind()
-        player.set_pos(pos)
+        playerMusic.music.rewind()
+        playerMusic.music.set_pos(pos)
         self.currentPlaybackPos = pos
         if playerWasBusy:
-            player.play()
+            playerMusic.music.play()
         return
 
     def updateCurrentPlaybackPos(self):
-        self.currentPlaybackPos = player.get_pos()
+        self.currentPlaybackPos = playerMusic.music.get_pos()
         return
     def changeMode(self):
         if self.mode == "auto":

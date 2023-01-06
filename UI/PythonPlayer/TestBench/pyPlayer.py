@@ -57,7 +57,10 @@ class Player:
         self.currentFile = playlist[self.currentIndex]
         self.currentFileName = os.path.basename(self.currentFile)
         self.currentPlaybackPos = 0.0
+        pygame.init()
         pygame.mixer.init()
+        self.MUSIC_END = pygame.USEREVENT + 1
+        pygame.mixer.music.set_endevent(self.MUSIC_END)
 
         with info.audio_open(self.currentFile) as f:
             self.fileDuration = f.duration
@@ -75,6 +78,14 @@ class Player:
         playerMusic.music.set_endevent(pygame.USEREVENT)
         # write a goddamn userevent for this lil bullshit
 
+    def checkUserEvent(self):
+        for event in pygame.event.get():
+            if event.type == self.MUSIC_END:
+                self.endEvent()
+                return
+        print("checked")
+        return
+
     def updateBaseData(self) -> None:
         self.currentFile = self.playlist[self.currentIndex]
         self.currentFileName = os.path.basename(self.currentFile)
@@ -83,7 +94,7 @@ class Player:
             f.close()
         return
 
-    def endEvent(self) -> None:
+    def endEvent(self):
         if self.mode == "auto":
             if self.currentIndex == self.maxIndex:
                 self.currentIndex = 0

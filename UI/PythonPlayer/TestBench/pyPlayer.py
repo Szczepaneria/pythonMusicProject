@@ -60,6 +60,7 @@ class Player:
         self.currentFile = playlist[self.currentIndex]
         self.currentFileName = os.path.basename(self.currentFile)
         self.currentPlaybackPos = 0.0
+        self.lastOn = False
         pygame.init()
         pygame.mixer.init()
         self.MUSIC_END = pygame.USEREVENT + 1
@@ -205,12 +206,16 @@ class Player:
         return
 
     def playPushedPlay(self, button):
-        if playerMusic.music.get_busy():
+        if playerMusic.music.get_busy() and self.lastOn:
             self.playPause()
+            self.lastOn = False
             button.setIcon(QIcon("play.png"))
+            button.setText("Play")
         else:
             self.playUnPause()
+            self.lastOn = True
             button.setIcon(QIcon("pause.png"))
+            button.setText("Pause")
 
     def changeVolume(self, amount) -> bool:
         checkedAmount = 0.0
@@ -226,15 +231,20 @@ class Player:
         else:
             return True
 
+
     def changePos(self, pos):
         playerWasBusy = False
         if playerMusic.music.get_busy():
             playerWasBusy = True
             playerMusic.music.pause()
 
-        playerMusic.music.rewind()
-        playerMusic.music.set_pos(pos)
-        self.currentPlaybackPos = pos
+        try:
+            playerMusic.music.rewind()
+            playerMusic.music.set_pos(pos)
+            self.currentPlaybackPos = pos
+        except:
+            print("Codec not supported")
+
         if playerWasBusy:
             playerMusic.music.play()
         return

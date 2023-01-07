@@ -1,4 +1,4 @@
-import player
+import player_scheme
 
 
 def print_hi(name):

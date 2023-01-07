@@ -63,6 +63,10 @@ class Player:
         self.lastOn = False
         pygame.init()
         pygame.mixer.init()
+        pygame.mixer.music.set_volume(1.0)
+        playerMusic.music.load(self.currentFile)
+        playerMusic.music.play()
+        playerMusic.music.pause()
         self.MUSIC_END = pygame.USEREVENT + 1
         pygame.mixer.music.set_endevent(self.MUSIC_END)
 
@@ -242,11 +246,10 @@ class Player:
             playerMusic.music.rewind()
             playerMusic.music.set_pos(pos)
             self.currentPlaybackPos = pos
+            if playerWasBusy:
+                playerMusic.music.play()
         except:
             print("Codec not supported")
-
-        if playerWasBusy:
-            playerMusic.music.play()
         return
 
     def updateCurrentPlaybackPos(self):

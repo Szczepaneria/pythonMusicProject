@@ -63,7 +63,7 @@ class Player:
         self.lastOn = False
         pygame.init()
         pygame.mixer.init()
-        pygame.mixer.music.set_volume(1.0)
+        pygame.mixer.music.set_volume(0.0)
         playerMusic.music.load(self.currentFile)
         playerMusic.music.play()
         playerMusic.music.pause()
@@ -72,6 +72,7 @@ class Player:
 
         with info.audio_open(self.currentFile) as f:
             self.fileDuration = f.duration
+            print("Current file duration is: " + str(self.fileDuration))
             f.close()
 
         if mode == 2:
@@ -103,6 +104,8 @@ class Player:
         return
 
     def endEvent(self, display):
+        playerMusic.music.pause()
+        playerMusic.music.unload()
         if self.mode == "auto":
             if self.currentIndex == self.maxIndex:
                 self.currentIndex = 0
@@ -204,12 +207,22 @@ class Player:
         # change button UI to play
         return
 
+    def sliderUpdate(self, slider):
+        time_passed = playerMusic.music.get_pos() / 1000  # seconds
+        if time_passed == 0.0:
+            slider.setValue(0)
+            return
+        else:
+            current_slider_pos = round(1000 * (time_passed / self.fileDuration))
+            slider.setValue(current_slider_pos)
+        return
+
     def playUnPause(self) -> None:
         playerMusic.music.unpause()
         # change button UI to pause
         return
 
-    def playPushedPlay(self, button):
+    def playPushedPlay(self, button, display):
         if playerMusic.music.get_busy() and self.lastOn:
             self.playPause()
             self.lastOn = False
@@ -220,14 +233,17 @@ class Player:
             self.lastOn = True
             button.setIcon(QIcon("pause.png"))
             button.setText("Pause")
+        display.setPlaceholderText(self.currentFileName)
+        return
 
-    def changeVolume(self, amount) -> bool:
+    def changeVolume(self, amount):
         checkedAmount = 0.0
-
-        if amount > 1.0:
+        if amount >= 1.0:
             checkedAmount = 1.0
-        elif amount < 0.0:
+        elif amount <= 0.0:
             checkedAmount = 0.0
+        else:
+            checkedAmount = amount
         try:
             playerMusic.music.set_volume(checkedAmount)
         except:
@@ -235,6 +251,15 @@ class Player:
         else:
             return True
 
+    def pressChangeVolume(self, slider):
+        # slider value from 0 to 100
+        val = slider.value()
+        if val == 0:
+            self.changeVolume(0.0)
+        else:
+            print(val / 100)
+            self.changeVolume(val / 100)
+        return
 
     def changePos(self, pos):
         playerWasBusy = False

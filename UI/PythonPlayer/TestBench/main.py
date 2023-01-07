@@ -9,7 +9,7 @@
 import faulthandler
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtCore import pyqtSlot, QTimer
 import pyPlayer as playerTools
 
 # init player with playlist
@@ -28,9 +28,10 @@ class Ui_Widget(object):
         slider.valueChanged.connect(self.sliderChanged)
         slider.valueChanged.emit(slider.value())
 
-    #def setSound(self):
+    def changeVolume(self, slider):
+        p1.pressChangeVolume(slider)
 
-
+    # def setSound(self):
 
     def setupUi(self, Widget):
         Widget.setObjectName("Widget")
@@ -70,7 +71,7 @@ class Ui_Widget(object):
         self.soundSlider.setOrientation(QtCore.Qt.Vertical)
         self.soundSlider.setObjectName("soundSlider")
         self.soundSlider.setMinimum(0)
-        self.soundSlider.setMaximum(1000)
+        self.soundSlider.setMaximum(100)
         self.optionsLayout.addWidget(self.soundSlider)
         self.verticalLayout.addLayout(self.optionsLayout)
         self.textDisplayLayout = QtWidgets.QVBoxLayout()
@@ -113,7 +114,7 @@ class Ui_Widget(object):
         self.verticalLayout.addLayout(self.buttonsLayout)
         self.sliderSong = QtWidgets.QSlider(self.verticalLayoutWidget)
         self.sliderSong.setMinimum(0)
-        self.sliderSong.setMaximum(10000)
+        self.sliderSong.setMaximum(1000)
         self.sliderSong.setOrientation(QtCore.Qt.Horizontal)
         self.sliderSong.setObjectName("sliderSong")
         self.verticalLayout.addWidget(self.sliderSong)
@@ -121,13 +122,14 @@ class Ui_Widget(object):
         self.retranslateUi(Widget)
         QtCore.QMetaObject.connectSlotsByName(Widget)
 
-        self.buttonPlay.clicked.connect(lambda: p1.playPushedPlay(button=self.buttonPlay))
+        self.buttonPlay.clicked.connect(lambda: p1.playPushedPlay(button=self.buttonPlay, display=self.textSongDisplay))
         self.buttonNext.clicked.connect(lambda: p1.playNext(self.textSongDisplay))
         self.buttonPrevious.clicked.connect(lambda: p1.playPrevious(self.textSongDisplay))
+        self.soundSlider.valueChanged.connect(lambda: p1.pressChangeVolume(self.soundSlider))
 
-        self.sliderSong.valueChanged.connect(lambda: self.sliderChanged(self.sliderSong))
-        self.sliderSong.sliderPressed.connect(lambda: self.sldDisconnect(self.sliderSong))
-        self.sliderSong.sliderReleased.connect(lambda: self.sldReconnect(self.sliderSong))
+        # self.sliderSong.valueChanged.connect(lambda: self.sliderChanged(self.sliderSong))
+        # self.sliderSong.sliderPressed.connect(lambda: self.sldDisconnect(self.sliderSong))
+        # self.sliderSong.sliderReleased.connect(lambda: self.sldReconnect(self.sliderSong))
 
     def retranslateUi(self, Widget):
         _translate = QtCore.QCoreApplication.translate
@@ -140,6 +142,9 @@ class Ui_Widget(object):
     def getDisplay(self):
         return self.textSongDisplay
 
+    def getSlider(self):
+        return self.sliderSong
+
 
 if __name__ == "__main__":
     faulthandler.enable()
@@ -151,6 +156,12 @@ if __name__ == "__main__":
 
     timer = QTimer()
     timer.timeout.connect(lambda: p1.checkUserEvent(Ui_Widget.getDisplay(ui)))
-    timer.setInterval(500)  # 1000ms = 1s
+    timer.setInterval(1000)  # 1000ms = 1s
     timer.start()
+
+    timer_slider = QTimer()
+    timer_slider.timeout.connect(lambda: p1.sliderUpdate(Ui_Widget.getSlider(ui)))
+    timer_slider.setInterval(500)
+    timer_slider.start()
+
     sys.exit(app.exec_())

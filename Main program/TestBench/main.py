@@ -9,6 +9,7 @@
 import faulthandler
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtGui import *
 from PyQt5.QtCore import pyqtSlot, QTimer
 import pyPlayer as playerTools
 
@@ -99,6 +100,7 @@ class Ui_Widget(object):
         sizePolicy.setHeightForWidth(self.buttonPrevious.sizePolicy().hasHeightForWidth())
         self.buttonPrevious.setSizePolicy(sizePolicy)
         self.buttonPrevious.setObjectName("buttonPrevious")
+        self.buttonPrevious.setIcon(QIcon("left_next.png"))
         self.buttonsLayout.addWidget(self.buttonPrevious)
         self.buttonPlay = QtWidgets.QPushButton(self.verticalLayoutWidget)
         self.buttonPlay.setToolTipDuration(0)
@@ -107,8 +109,7 @@ class Ui_Widget(object):
         self.buttonNext = QtWidgets.QPushButton(self.verticalLayoutWidget)
         self.buttonNext.setText("Next")
         self.buttonNext.setCheckable(False)
-        self.buttonNext.setAutoRepeatDelay(197)
-        self.buttonNext.setAutoRepeatInterval(90)
+        self.buttonNext.setIcon(QIcon("right_next.png"))
         self.buttonNext.setObjectName("buttonNext")
         self.buttonsLayout.addWidget(self.buttonNext)
         self.verticalLayout.addLayout(self.buttonsLayout)
@@ -133,9 +134,9 @@ class Ui_Widget(object):
 
     def retranslateUi(self, Widget):
         _translate = QtCore.QCoreApplication.translate
-        Widget.setWindowTitle(_translate("Widget", "Widget"))
+        Widget.setWindowTitle(_translate("Widget", "PythonPlayer"))
         self.buttonMode.setText(_translate("Widget", "Mode"))
-        self.textSongDisplay.setPlaceholderText(_translate("Widget", "<empty>"))
+        self.textSongDisplay.setPlaceholderText(_translate("Widget", "<Press 'Play' to play music>"))
         self.buttonPrevious.setText(_translate("Widget", "Previous"))
         self.buttonPlay.setText(_translate("Widget", "Play/Pause"))
 

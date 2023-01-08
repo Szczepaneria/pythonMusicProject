@@ -151,7 +151,9 @@ class Player:
 
         if playerMusic.music.get_busy():
             wasBusy = True
-            playerMusic.music.pause()
+            # print(playerMusic.music.get_busy())
+        # print(playerMusic.music.get_busy())
+        playerMusic.music.pause()
         playerMusic.music.unload()
 
         if self.currentIndex == self.maxIndex:
@@ -162,12 +164,15 @@ class Player:
         self.updateBaseData()
         # player.load(self.playlist[self.currentIndex])
         playerMusic.music.load(self.currentFile)
+        playerMusic.music.play()
+        playerMusic.music.pause()
 
         if wasBusy:
             if self.mode == "one loop":
                 playerMusic.music.play(-1)
-            elif self.mode != "one loop":
+            else:
                 playerMusic.music.play()
+
         display.setPlaceholderText(self.currentFileName)
 
     def playPrevious(self, display) -> None:
@@ -195,6 +200,8 @@ class Player:
 
         # player.load(self.playlist[self.currentIndex])
         playerMusic.music.load(self.currentFile)
+        playerMusic.music.play()
+        playerMusic.music.pause()
 
         if wasBusy:
             playerMusic.music.play()

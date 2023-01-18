@@ -7,6 +7,6 @@ Todo:
 - [x] Zbinować przyciski
 - [x] Dodać zmianę ikonek przy "play", "next", itd
 - [x] Dodać mulithreading, aby UI działało w tle
-- [ ] Dodać obsługę eventów z pygame'a
+- [x] Dodać obsługę eventów z pygame'a
 - [x] Eventualny debugging
- 
+- [ ] Make database

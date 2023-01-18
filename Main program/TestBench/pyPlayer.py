@@ -162,7 +162,6 @@ class Player:
             self.currentIndex += 1
 
         self.updateBaseData()
-        # player.load(self.playlist[self.currentIndex])
         playerMusic.music.load(self.currentFile)
         playerMusic.music.play()
         playerMusic.music.pause()
@@ -171,7 +170,7 @@ class Player:
             if self.mode == "one loop":
                 playerMusic.music.play(-1)
             else:
-                playerMusic.music.play()
+                playerMusic.music.unpause()
 
         display.setPlaceholderText(self.currentFileName)
 

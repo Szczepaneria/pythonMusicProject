@@ -31,6 +31,34 @@ def addDirectory(cursor, dirIn):
         print("Dir does not exist")
 
 
+# get all dirs
+def getAllDirs(cursor):
+    return cursor.execute("SELECT * from dirs").fetchall()
+
+
+def updateDatabase(cursor):
+    tmpDir = getAllDirs(cursor)
+    dirs = []
+
+    for i in range(0, len(tmpDir) - 1):
+        newDir = tmpDir[i][0]
+        if os.path.isdir(newDir):
+            dirs.append(newDir)
+    del tmpDir
+
+    fileList = []
+    for musicDir in dirs:
+        for root, dirs, files in os.walk(musicDir):
+            for file in files:
+                if file.endswith(".mp3"):  # or file.endswith(".m4a"):
+                    print(os.path.join(root, file))
+                    fileList.append(os.path.join(root, file))
+    if fileList.__len__() == 0:
+        exit("No directories found!")
+    else:
+        return fileList
+
+
 # get all informations and store it in
 def getAll(cursor, musicTab, dirTab, cleanUpdate):
     if cleanUpdate:
@@ -38,8 +66,6 @@ def getAll(cursor, musicTab, dirTab, cleanUpdate):
         dirTab = []
 
     tmp = cursor.execute("SELECT * from music").fetchall()
-    for i in range(0, len(tmp)):
+    for i in range(0, len(tmp) - 1):
         musicTab.append(tmp[i][1])
         dirTab.append(tmp[i][0])
-
-

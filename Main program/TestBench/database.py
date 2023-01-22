@@ -3,8 +3,8 @@ import os
 
 con = sqlite3.connect("data.db")
 cur = con.cursor()
-cur.execute("CREATE TABLE IF NOT EXISTS directories(dir)")
-cur.execute("CREATE TABLE IF NOT EXISTS music(dir, name)")
+cur.execute("CREATE TABLE IF NOT EXISTS directories(id INTEGER PRIMARY KEY, dir)")
+cur.execute("CREATE TABLE IF NOT EXISTS directories(id INTEGER PRIMARY KEY, path)")
 
 
 # find in database functions
@@ -13,59 +13,57 @@ def checkInDatabase(cursor, dirIn):
 
 
 def checkInMusic(cursor, musIn):
-    return cursor.execute("SELECT COUNT(*) from music WHERE dir=?", [musIn]).fetchone()[0] > 0
+    return cursor.execute("SELECT COUNT(*) from music WHERE path=?", [musIn]).fetchone()[0] > 0
 
 
 # add elements to database
 def addMusic(cursor, musIn):
-    if os.path.exists(musIn) and not checkInMusic(cursor, musIn):
-        cursor.execute("INSERT INTO music(dir, name) VALUES (" + musIn + ", " + os.path.basename(musIn))
+    if not os.path.isfile(musIn):
+        print("Path / music does not exist")
+    elif checkInMusic(cursor, musIn):
+        print("Already in music database")
     else:
-        print("Path does not exist")
+        cursor.execute("INSERT INTO music(path) VALUES (?)", [musIn])
+        con.commit()
 
 
 def addDirectory(cursor, dirIn):
-    if os.path.isdir(dirIn) and not checkInDatabase(cursor, dirIn):
-        cursor.execute("INSERT INTO directories(dir) VALUES (" + dirIn)
-    else:
+    if not os.path.isdir(dirIn):
         print("Dir does not exist")
+    elif checkInDatabase(cursor, dirIn):
+        print("Already in database")
+    else:
+        cursor.execute("INSERT INTO directories(dir) VALUES (?)", [dirIn])
+        print(cursor.rowcount)
+        con.commit()
 
 
 # get all dirs
 def getAllDirs(cursor):
-    return cursor.execute("SELECT * from dirs").fetchall()
+    return cursor.execute("SELECT dir from directories").fetchall()
 
 
 def updateDatabase(cursor):
     tmpDir = getAllDirs(cursor)
     dirs = []
 
-    for i in range(0, len(tmpDir) - 1):
-        newDir = tmpDir[i][0]
+    for i in tmpDir:
+        newDir = i[0]
         if os.path.isdir(newDir):
             dirs.append(newDir)
     del tmpDir
 
-    fileList = []
     for musicDir in dirs:
         for root, dirs, files in os.walk(musicDir):
             for file in files:
                 if file.endswith(".mp3"):  # or file.endswith(".m4a"):
-                    print(os.path.join(root, file))
-                    fileList.append(os.path.join(root, file))
-    if fileList.__len__() == 0:
-        exit("No directories found!")
-    else:
-        return fileList
+                    # print(os.path.join(root, file))
+                    # fileList.append(os.path.join(root, file))
+                    addMusic(cursor, os.path.join(root, file))
+    return
 
 
-# get all informations and store it in
-def getAll(cursor, musicTab, dirTab, cleanUpdate):
-    if cleanUpdate:
-        musicTab = []
-        dirTab = []
+def getLastIndex(cursor) -> int:
+    return cursor.execute("SELECT MAX(id) from music").fetchone()[0]
 
-    tmp = cursor.execute("SELECT * from music").fetchall()
-    for i in range(0, len(tmp) - 1):
-        musicTab.append(tmp[i][1])
-        dirTab.append(tmp[i][0])
+

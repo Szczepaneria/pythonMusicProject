@@ -119,6 +119,8 @@ class Ui_Widget(object):
         self.sliderSong.setOrientation(QtCore.Qt.Horizontal)
         self.sliderSong.setObjectName("sliderSong")
         self.verticalLayout.addWidget(self.sliderSong)
+        self.buttonMode.setDisabled(False)
+
 
         self.retranslateUi(Widget)
         QtCore.QMetaObject.connectSlotsByName(Widget)

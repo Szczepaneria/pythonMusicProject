@@ -5,31 +5,32 @@ import pygame
 from pygame import mixer as playerMusic
 import os
 import audioread as info
+import database
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 dirList = []
 fileList = []
 
 
-def searchFiles():
-    # C:\Users\7kube\Music\reszta\mp3
-    f = open("directories.txt", "r")
-    for x in f:
-        if os.path.exists(x):
-            dirList.append(x)
-        else:
-            print("Dir " + str(x) + " does not exist!\n")
-    f.close()
-
-    for musicDir in dirList:
-        for root, dirs, files in os.walk(musicDir):
-            for file in files:
-                if file.endswith(".mp3"):  # or file.endswith(".m4a"):
-                    print(os.path.join(root, file))
-                    fileList.append(os.path.join(root, file))
-    if fileList.__len__() == 0:
-        exit("No directories found!")
-    # check list of directories
+# def searchFiles():
+#     # C:\Users\7kube\Music\reszta\mp3
+#     f = open("firstRun.txt", "r")
+#     for x in f:
+#         if os.path.exists(x):
+#             dirList.append(x)
+#         else:
+#             print("Dir " + str(x) + " does not exist!\n")
+#     f.close()
+#
+#     for musicDir in dirList:
+#         for root, dirs, files in os.walk(musicDir):
+#             for file in files:
+#                 if file.endswith(".mp3"):  # or file.endswith(".m4a"):
+#                     print(os.path.join(root, file))
+#                     fileList.append(os.path.join(root, file))
+#     if len(fileList) == 0:
+#         exit("No directories found!")
+#     # check list of directories
 
 
 def InitPlaylist(musicList, mode):
@@ -53,11 +54,12 @@ def InitPlaylist(musicList, mode):
 
 
 class Player:
-    def __init__(self, playlist, mode=1):
-        self.playlist = InitPlaylist(playlist, "auto")
-        self.currentIndex = 0
-        self.maxIndex = len(self.playlist) - 1
-        self.currentFile = playlist[self.currentIndex]
+    def __init__(self, mode=1):
+        database.firstRunCheck()
+        database.updateDatabase(database.cur)
+        self.currentIndex = 1
+        self.maxIndex = database.getLastIndex(database.cur)
+        self.currentFile = database.getFileByIndex(database.cur, self.currentIndex)
         self.currentFileName = os.path.basename(self.currentFile)
         self.currentPlaybackPos = 0.0
         self.lastOn = False
@@ -96,7 +98,7 @@ class Player:
         return
 
     def updateBaseData(self) -> None:
-        self.currentFile = self.playlist[self.currentIndex]
+        self.currentFile = database.getFileByIndex(database.cur, self.currentIndex)
         self.currentFileName = os.path.basename(self.currentFile)
         with info.audio_open(self.currentFile) as f:
             self.fileDuration = f.duration
@@ -113,7 +115,7 @@ class Player:
                 self.currentIndex += 1
 
             self.updateBaseData()
-            playerMusic.music.load(self.playlist[self.currentIndex])
+            playerMusic.music.load(database.getFileByIndex(database.cur, self.currentIndex))
             playerMusic.music.play()
             display.setPlaceholderText(self.currentFileName)
             print("Playing")
@@ -151,13 +153,11 @@ class Player:
 
         if playerMusic.music.get_busy():
             wasBusy = True
-            # print(playerMusic.music.get_busy())
-        # print(playerMusic.music.get_busy())
         playerMusic.music.pause()
         playerMusic.music.unload()
 
         if self.currentIndex == self.maxIndex:
-            self.currentIndex = 0
+            self.currentIndex = 1
         else:
             self.currentIndex += 1
 
@@ -190,14 +190,12 @@ class Player:
             playerMusic.music.pause()
         playerMusic.music.unload()
 
-        if self.currentIndex == 0:
+        if self.currentIndex == 1:
             self.currentIndex = self.maxIndex
         else:
             self.currentIndex -= 1
 
         self.updateBaseData()
-
-        # player.load(self.playlist[self.currentIndex])
         playerMusic.music.load(self.currentFile)
         playerMusic.music.play()
         playerMusic.music.pause()

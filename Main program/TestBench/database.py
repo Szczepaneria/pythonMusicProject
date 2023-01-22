@@ -67,3 +67,23 @@ def getLastIndex(cursor) -> int:
     return cursor.execute("SELECT MAX(id) from music").fetchone()[0]
 
 
+def getFileByIndex(cursor, index):
+    return cursor.execute("SELECT path from music where id=?", [index]).fetchone()[0]
+
+
+def firstRunCheck():
+    if os.path.exists(os.path.dirname(os.path.abspath(__file__)) + r"\firstRun.txt"):
+        if os.path.exists("firstRun.txt"):
+            os.remove("firstRun.txt")
+    else:
+        return
+
+    while True:
+        a = input("First time running...\nPlease give a valid directory for music search")
+        if os.path.exists(a):
+            addDirectory(cur, a)
+            updateDatabase(cur)
+            break
+        else:
+            print("Invalid path...\nTry again :)")
+    return

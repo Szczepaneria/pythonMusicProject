@@ -21,7 +21,6 @@ from PyQt5.QtCore import pyqtSlot, QTimer
 import pyPlayer as playerTools
 
 # init player with playlist
-playerTools.searchFiles()
 p1 = playerTools.Player(playerTools.InitPlaylist(playerTools.fileList, mode=1))
 
 

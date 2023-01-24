@@ -1,10 +1,11 @@
 import sqlite3
 import os
 
+unstable = False
 con = sqlite3.connect("data.db")
 cur = con.cursor()
 cur.execute("CREATE TABLE IF NOT EXISTS directories(id INTEGER PRIMARY KEY, dir)")
-cur.execute("CREATE TABLE IF NOT EXISTS directories(id INTEGER PRIMARY KEY, path)")
+cur.execute("CREATE TABLE IF NOT EXISTS music(id INTEGER PRIMARY KEY, path)")
 
 
 # find in database functions
@@ -72,6 +73,9 @@ def getFileByIndex(cursor, index):
 
 
 def firstRunCheck():
+    if unstable:
+        cur.execute("DELETE FROM music if exists")
+        cur.execute("DELETE FROM directories if exists")
     if os.path.exists(os.path.dirname(os.path.abspath(__file__)) + r"\firstRun.txt"):
         if os.path.exists("firstRun.txt"):
             os.remove("firstRun.txt")

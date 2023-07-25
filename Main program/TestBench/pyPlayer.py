@@ -60,7 +60,7 @@ class Player:
         self.currentIndex = 1
         self.maxIndex = database.getLastIndex(database.cur)
         self.currentFile = database.getFileByIndex(database.cur, self.currentIndex)
-        self.currentFileName = os.path.basename(self.currentFile)
+        self.currentFileName = os.path.basename(self.currentFile).rsplit('.', 1)[0]
         self.currentPlaybackPos = 0.0
         self.lastOn = False
         pygame.init()
@@ -74,7 +74,8 @@ class Player:
 
         with info.audio_open(self.currentFile) as f:
             self.fileDuration = f.duration
-            print("Current file duration is: " + str(self.fileDuration))
+            if database.debug:
+                print("Current file duration is: " + str(self.fileDuration))
             f.close()
 
         if mode == 2:
@@ -99,7 +100,7 @@ class Player:
 
     def updateBaseData(self) -> None:
         self.currentFile = database.getFileByIndex(database.cur, self.currentIndex)
-        self.currentFileName = os.path.basename(self.currentFile)
+        self.currentFileName = os.path.basename(self.currentFile).rsplit('.', 1)[0]
         with info.audio_open(self.currentFile) as f:
             self.fileDuration = f.duration
             f.close()

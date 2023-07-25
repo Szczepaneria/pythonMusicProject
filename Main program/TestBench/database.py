@@ -1,6 +1,7 @@
 import sqlite3
 import os
 
+debug = False
 unstable = False
 con = sqlite3.connect("data.db")
 cur = con.cursor()
@@ -19,23 +20,24 @@ def checkInMusic(cursor, musIn):
 
 # add elements to database
 def addMusic(cursor, musIn):
-    if not os.path.isfile(musIn):
+    if not os.path.isfile(musIn) and debug:
         print("Path / music does not exist")
-    elif checkInMusic(cursor, musIn):
-        print("Already in music database")
+    elif checkInMusic(cursor, musIn) and debug:
+        print("Already in music database: <" + str(musIn) + ">")
     else:
         cursor.execute("INSERT INTO music(path) VALUES (?)", [musIn])
         con.commit()
 
 
 def addDirectory(cursor, dirIn):
-    if not os.path.isdir(dirIn):
+    if not os.path.isdir(dirIn) and debug:
         print("Dir does not exist")
-    elif checkInDatabase(cursor, dirIn):
-        print("Already in database")
+    elif checkInDatabase(cursor, dirIn) and debug:
+        print("Already in database: " + str(dirIn))
     else:
         cursor.execute("INSERT INTO directories(dir) VALUES (?)", [dirIn])
-        print(cursor.rowcount)
+        if debug:
+            print(cursor.rowcount)
         con.commit()
 
 
@@ -76,6 +78,7 @@ def firstRunCheck():
     if unstable:
         cur.execute("DELETE FROM music if exists")
         cur.execute("DELETE FROM directories if exists")
+        con.commit()
     if os.path.exists(os.path.dirname(os.path.abspath(__file__)) + r"\firstRun.txt"):
         if os.path.exists("firstRun.txt"):
             os.remove("firstRun.txt")
@@ -83,10 +86,11 @@ def firstRunCheck():
         return
 
     while True:
-        a = input("First time running...\nPlease give a valid directory for music search")
+        a = input("First time running...\nPlease give a valid directory for music search:\n")
         if os.path.exists(a):
             addDirectory(cur, a)
             updateDatabase(cur)
+            print("\nThank you, got it!")
             break
         else:
             print("Invalid path...\nTry again :)")
